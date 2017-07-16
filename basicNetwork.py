@@ -1,3 +1,9 @@
+# Accuracy = 80%. Max = 82.2%.
+# Training_samples = 1393
+# Validation_samples = 697
+# channels_first with theano
+# channels_last with tensorflow
+
 from __future__ import division
 
 import keras
@@ -13,10 +19,10 @@ from sklearn.preprocessing import LabelEncoder
 
 # dimensions of our images
 img_width, img_height = 256, 342 # These are default image dimensions
-train_data_dir = '/home/bilawal/Summer2017/myNetwork/data/all_years_342x256/train/'
-val_data_dir = '/home/bilawal/Summer2017/myNetwork/data/all_years_342x256/val/'
-test_data_dir = '/home/bilawal/Summer2017/myNetwork/data/all_years_342x256/test/'
-batch_size = 8 # increase it depending on how fast the gpu runs
+train_data_dir = './data/all_years_342x256/train/'
+val_data_dir = './data/all_years_342x256/val/'
+test_data_dir = './data/all_years_342x256/test/'
+batch_size = 16 # increase it depending on how fast the gpu runs
 
 
 if K.image_data_format() == 'channels_first':
@@ -51,8 +57,8 @@ def _load_data_train(data_dir=train_data_dir):
 	transformed_label = encoder.fit_transform(label_lst)
 
 	X_data = np.asarray(img_lst)
+	X_data = np.transpose(X_data, (0, 3, 1, 2))
 	y_data = np.asarray(transformed_label, dtype=np.uint8)
-	#X_data = X_data.transpose(0,3,1,2)
 
 	return (X_data, y_data)
 
@@ -79,6 +85,7 @@ def _load_data_test(data_dir=test_data_dir):
 	transformed_label = encoder.fit_transform(label_lst)
 
 	X_data = np.asarray(img_lst)
+	X_data = np.transpose(X_data, (0, 3, 1, 2))
 	y_data = np.asarray(transformed_label, dtype=np.uint8)
 	#X_data = X_data.transpose(0,3,1,2)
 
@@ -107,6 +114,7 @@ def _load_data_val(data_dir=val_data_dir):
 	transformed_label = encoder.fit_transform(label_lst)
 
 	X_data = np.asarray(img_lst)
+	X_data = np.transpose(X_data, (0, 3, 1, 2))
 	y_data = np.asarray(transformed_label, dtype=np.uint8)
 	#X_data = X_data.transpose(0,3,1,2)
 
@@ -115,6 +123,7 @@ def _load_data_val(data_dir=val_data_dir):
 
 
 (X_train, y_train) = _load_data_train()
+print X_train.shape
 (X_test, y_test) = _load_data_test()
 (X_val, y_val) = _load_data_val()
 
@@ -135,7 +144,7 @@ y_val = keras.utils.to_categorical(y_val, 14)
 # create the neural network architecture
 
 model = Sequential()
-model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(256, 342, 3)))
+model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(3, 256, 342)))
 model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.25))
@@ -167,9 +176,9 @@ model.fit_generator (
 
 """
 
-model.fit(x=X_train, y=y_train, batch_size=8, validation_data=(X_val, y_val), epochs = 10, verbose=1)
+model.fit(x=X_train, y=y_train, batch_size=batch_size, validation_data=(X_val, y_val), epochs = 10, verbose=1)
 
-score = model.evaluate(X_test, y_test, batch_size = 8, verbose = 1)
+score = model.evaluate(X_test, y_test, batch_size = batch_size, verbose = 1)
 print score
 
 # model.save_weights('Saved_Weights.h5')
