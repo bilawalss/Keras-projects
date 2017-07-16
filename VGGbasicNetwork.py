@@ -9,6 +9,7 @@ from __future__ import division
 import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models  import Sequential
+from keras.optimizers import SGD
 from keras.layers import *
 from keras import backend as K
 from scipy.misc import imread
@@ -21,7 +22,7 @@ img_width, img_height = 256, 342 # These are default image dimensions
 train_data_dir = './data/all_years_342x256/train/'
 val_data_dir = './data/all_years_342x256/val/'
 test_data_dir = './data/all_years_342x256/test/'
-batch_size = 16 # increase it depending on how fast the gpu runs
+batch_size = 2 # increase it depending on how fast the gpu runs
 epochs = 100
 
 if K.image_data_format() == 'channels_first':
@@ -142,24 +143,38 @@ y_val = keras.utils.to_categorical(y_val, 14)
 # create the neural network architecture
 
 model = Sequential()
-model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(3, 256, 342)))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.25))
+model.add(Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(3, 256, 342)))
+model.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
 
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.25))
+model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+model.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+model.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+
+model.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
 
 model.add(Flatten())
-model.add(Dense(128, activation='relu'))
-model.add(Dropout(0.5))
+model.add(Dense(4096, activation= 'relu'))
+model.add(Dense(4096, activation= 'relu'))
 model.add(Dense(14, activation='softmax'))
 
 
-model.compile(loss='categorical_crossentropy', # can change to categorical_crossentropy
-				optimizer = 'rmsprop', # can use adagrad instead
+sgd = SGD(lr=0.0005, decay=1e-6, momentum=0.9, nesterov=True)
+model.compile(loss='categorical_crossentropy', 
+				optimizer=sgd, 
 				metrics = ['accuracy'])
 
 """
@@ -180,7 +195,3 @@ score = model.evaluate(X_test, y_test, batch_size = batch_size, verbose = 1)
 print score
 
 # model.save_weights('Saved_Weights.h5')
-
-
-
-

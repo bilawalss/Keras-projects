@@ -52,8 +52,8 @@ def _load_data_train(data_dir=train_data_dir):
 	transformed_label = encoder.fit_transform(label_lst)
 
 	X_data = np.asarray(img_lst)
+	X_data = np.transpose(X_data, (0, 3, 1, 2))
 	y_data = np.asarray(transformed_label, dtype=np.uint8)
-	#X_data = X_data.transpose(0,3,1,2)
 
 	return (X_data, y_data)
 
@@ -80,8 +80,8 @@ def _load_data_test(data_dir=test_data_dir):
 	transformed_label = encoder.fit_transform(label_lst)
 
 	X_data = np.asarray(img_lst)
+	X_data = np.transpose(X_data, (0, 3, 1, 2))
 	y_data = np.asarray(transformed_label, dtype=np.uint8)
-	#X_data = X_data.transpose(0,3,1,2)
 
 	return (X_data, y_data)	
 
@@ -108,14 +108,15 @@ def _load_data_val(data_dir=val_data_dir):
 	transformed_label = encoder.fit_transform(label_lst)
 
 	X_data = np.asarray(img_lst)
+	X_data = np.transpose(X_data, (0, 3, 1, 2))
 	y_data = np.asarray(transformed_label, dtype=np.uint8)
-	#X_data = X_data.transpose(0,3,1,2)
 
 	return (X_data, y_data)		
 
 
 
 (X_train, y_train) = _load_data_train()
+print X_train.shape
 (X_test, y_test) = _load_data_test()
 (X_val, y_val) = _load_data_val()
 
@@ -148,13 +149,17 @@ model.add(Dense(256, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(14, activation='softmax'))
 
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-
+'''
 model.compile(loss='categorical_crossentropy',
-				optimizer=sgd,
+				optimizer='rmsprop',
 				metrics = ['accuracy'])
 
+'''
 
+sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+model.compile(loss='categorical_crossentropy', 
+				optimizer=sgd,
+				metrics = ['accuracy']) 
 
 train_datagen = ImageDataGenerator(
 
@@ -172,15 +177,13 @@ train_generator = train_datagen.flow_from_directory(
 
 				train_data_dir,
 				target_size = (225, 225),
-				batch_size = batch_size,
-				data_format = "channels_first")
+				batch_size = batch_size)
 
 validation_generator = test_datagen.flow_from_directory(
 
 				val_data_dir,
 				target_size=(225, 225),
-				batch_size = batch_size,
-				data_format = "channels_first")
+				batch_size = batch_size)
 
 model.fit_generator(
 
