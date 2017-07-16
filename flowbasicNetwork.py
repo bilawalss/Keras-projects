@@ -18,121 +18,15 @@ train_data_dir = './data/all_years_342x256/train/'
 val_data_dir = './data/all_years_342x256/val/'
 test_data_dir = './data/all_years_342x256/test/'
 batch_size = 32 # increase it depending on how fast the gpu runs
-epochs = 10
+epochs = 100
 
 if K.image_data_format() == 'channels_first':
 	input_shape = (3, img_width, img_height)
 else:
 	input_shape = (img_width, img_height, 3)
-
-		
-# Loads the data from the directory, will try to make a separate class for it
-# Returns (X_train, y_train), (X_test, y_test)s
-
-def _load_data_train(data_dir=train_data_dir):
 	
-	labels = os.listdir(data_dir)
-	label_counter = 0
-	label_lst = list()
-	img_lst = list()
 
-	# time to return the images and the labels
-
-	encoder = LabelEncoder()
-	for label in labels: 	
-		if (not label.startswith('.')):
-			img_dir = data_dir + str(label)+"/"
-			images = os.listdir(img_dir)
-			for img in images:
-				if (not img.startswith('.')):
-					img2 = imread((img_dir + img)[:])
-					img_lst.append(img2)
-					label_lst.append(label)
-
-	transformed_label = encoder.fit_transform(label_lst)
-
-	X_data = np.asarray(img_lst)
-	X_data = np.transpose(X_data, (0, 3, 1, 2))
-	y_data = np.asarray(transformed_label, dtype=np.uint8)
-
-	return (X_data, y_data)
-
-def _load_data_test(data_dir=test_data_dir):
-	
-	labels = os.listdir(data_dir)
-	label_counter = 0
-	label_lst = list()
-	img_lst = list()
-
-	# time to return the images and the labels
-
-	encoder = LabelEncoder()
-	for label in labels: 	
-		if (not label.startswith('.')):
-			img_dir = data_dir + str(label)+"/"
-			images = os.listdir(img_dir)
-			for img in images:
-				if (not img.startswith('.')):
-					img2 = imread((img_dir + img)[:])
-					img_lst.append(img2)
-					label_lst.append(label)
-
-	transformed_label = encoder.fit_transform(label_lst)
-
-	X_data = np.asarray(img_lst)
-	X_data = np.transpose(X_data, (0, 3, 1, 2))
-	y_data = np.asarray(transformed_label, dtype=np.uint8)
-
-	return (X_data, y_data)	
-
-def _load_data_val(data_dir=val_data_dir):
-	
-	labels = os.listdir(data_dir)
-	label_counter = 0
-	label_lst = list()
-	img_lst = list()
-
-	# time to return the images and the labels
-
-	encoder = LabelEncoder()
-	for label in labels: 	
-		if (not label.startswith('.')):
-			img_dir = data_dir + str(label)+"/"
-			images = os.listdir(img_dir)
-			for img in images:
-				if (not img.startswith('.')):
-					img2 = imread((img_dir + img)[:])
-					img_lst.append(img2)
-					label_lst.append(label)
-
-	transformed_label = encoder.fit_transform(label_lst)
-
-	X_data = np.asarray(img_lst)
-	X_data = np.transpose(X_data, (0, 3, 1, 2))
-	y_data = np.asarray(transformed_label, dtype=np.uint8)
-
-	return (X_data, y_data)		
-
-
-
-(X_train, y_train) = _load_data_train()
-print X_train.shape
-(X_test, y_test) = _load_data_test()
-(X_val, y_val) = _load_data_val()
-
-# Preprocess the data
-
-X_train = X_train.astype('float32')
-y_train = keras.utils.to_categorical(y_train, 14)
-
-X_test = X_test.astype('float32')
-y_test = keras.utils.to_categorical(y_test, 14)
-
-X_val = X_val.astype('float32')
-y_val = keras.utils.to_categorical(y_val, 14)
-
-# create the neural network architecture
-
+# Set up the model
 model = Sequential()
 model.add(Conv2D(32, (3, 3), activation='relu', input_shape= input_shape))
 model.add(Conv2D(32, (3, 3), activation='relu'))
@@ -149,14 +43,8 @@ model.add(Dense(256, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(14, activation='softmax'))
 
-'''
-model.compile(loss='categorical_crossentropy',
-				optimizer='rmsprop',
-				metrics = ['accuracy'])
 
-'''
-
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+sgd = SGD(lr=0.005, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy', 
 				optimizer=sgd,
 				metrics = ['accuracy']) 
@@ -170,8 +58,6 @@ train_datagen = ImageDataGenerator(
 test_datagen = ImageDataGenerator(
 
 			rescale = 1./255)
-
-train_datagen.fit(X_train)
 
 train_generator = train_datagen.flow_from_directory(
 
