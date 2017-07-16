@@ -6,7 +6,7 @@ from keras.optimizers import SGD
 from keras.models  import Sequential
 from keras.layers import *
 from keras import backend as K
-from scipy.misc import imread
+from scipy.misc import imread, imresize
 import sys, os
 from sklearn.preprocessing import LabelEncoder
 
@@ -18,7 +18,7 @@ train_data_dir = './data/all_years_342x256/train/'
 val_data_dir = './data/all_years_342x256/val/'
 test_data_dir = './data/all_years_342x256/test/'
 batch_size = 32 # increase it depending on how fast the gpu runs
-epochs = 100
+epochs = 1
 
 if K.image_data_format() == 'channels_first':
 	input_shape = (3, img_width, img_height)
@@ -80,8 +80,45 @@ model.fit_generator(
 				validation_steps = 697 // batch_size)
 
 
+def _load_data_test(data_dir=test_data_dir):
+	
+	labels = os.listdir(data_dir)
+	label_counter = 0
+	label_lst = list()
+	img_lst = list()
+
+	# time to return the images and the labels
+
+	encoder = LabelEncoder()
+	for label in labels: 	
+		if (not label.startswith('.')):
+			img_dir = data_dir + str(label)+"/"
+			images = os.listdir(img_dir)
+			for img in images:
+				if (not img.startswith('.')):
+					img2 = imread((img_dir + img))
+					img2 = imresize(img2, (225, 225))
+					img_lst.append(img2)
+					label_lst.append(label)
+
+	transformed_label = encoder.fit_transform(label_lst)
+
+	X_data = np.asarray(img_lst)
+	X_data = np.transpose(X_data, (0, 3, 1, 2))
+	y_data = np.asarray(transformed_label, dtype=np.uint8)
+	#X_data = X_data.transpose(0,3,1,2)
+
+	return (X_data, y_data)
+
+(X_test, y_test) = _load_data_test()
+
+X_test = X_test.astype('float32')
+X_test /= 255
+y_test = keras.utils.to_categorical(y_test, 14)	
+
 score = model.evaluate(X_test, y_test, batch_size = batch_size, verbose = 1)
-print score
+print "\nTest loss: " + str(score[0])
+print "\nTest Accuracy: "+ str(score[1])
 
 # model.save_weights('Saved_Weights.h5')
 

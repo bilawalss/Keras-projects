@@ -22,7 +22,7 @@ train_data_dir = './data/all_years_342x256/train/'
 val_data_dir = './data/all_years_342x256/val/'
 test_data_dir = './data/all_years_342x256/test/'
 batch_size = 16 # increase it depending on how fast the gpu runs
-epochs = 100
+epochs = 1
 
 if K.image_data_format() == 'channels_first':
 	input_shape = (3, img_width, img_height)
@@ -162,17 +162,6 @@ model.compile(loss='categorical_crossentropy', # can change to categorical_cross
 				optimizer = 'rmsprop', # can use adagrad instead
 				metrics = ['accuracy'])
 
-"""
-
-model.fit_generator (
-		(X_data, y_data),
-		steps_per_epoch = X_data.shape[0] // batch_size,
-		epochs = epochs,
-		validation_data = (X_data, y_data),
-		validaton_steps = X_data.shape[0] // batch_size)
-
-
-"""
 
 model.fit(x=X_train, y=y_train, batch_size=batch_size, validation_data=(X_val, y_val), epochs = epochs, verbose=1)
 
