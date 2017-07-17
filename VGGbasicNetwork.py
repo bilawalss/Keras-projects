@@ -21,7 +21,7 @@ train_data_dir = './data/all_years_342x256/train/'
 val_data_dir = './data/all_years_342x256/val/'
 test_data_dir = './data/all_years_342x256/test/'
 batch_size = 32 # increase it depending on how fast the gpu runs
-epochs = 40
+epochs = 100
 
 def _load_data(data_dir):
 	

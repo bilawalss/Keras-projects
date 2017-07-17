@@ -23,7 +23,7 @@ train_data_dir = './data/all_years_342x256/train/'
 val_data_dir = './data/all_years_342x256/val/'
 test_data_dir = './data/all_years_342x256/test/'
 batch_size = 16 # increase it depending on how fast the gpu runs
-epochs = 30
+epochs = 40
 
 if K.image_data_format() == 'channels_first':
 	input_shape = (3, img_width, img_height)

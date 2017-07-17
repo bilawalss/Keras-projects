@@ -1,0 +1,13 @@
+30 epochs:
+
+VGGbasicNetwork.py with sgd lr - 0.0005 : 78%
+VGGbasicNetwork.py with sgd lr - 0.001 : 84%
+With more layers, 0.01 gives better accuracy than 0.0005
+VGGbasicNetwork.py with rmsprop with dropout 0.25 in all layers : 87.315%
+VGGbasicNetwork.py with rmsprop with dropout 0.5 in all layers : 79.2%
+
+40 epochs:
+
+Changing the last dense layer from 256 output neurons to 1024 wasn't increasing accuracy
+
+86%
