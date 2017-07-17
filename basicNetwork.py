@@ -1,4 +1,5 @@
-# Accuracy = 80%. Max = 82.2%.
+# Validation Accuracy = 85%
+# Test Accuracy = 84.22%
 # Training_samples = 1393
 # Validation_samples = 697
 # channels_first with theano
@@ -22,7 +23,7 @@ train_data_dir = './data/all_years_342x256/train/'
 val_data_dir = './data/all_years_342x256/val/'
 test_data_dir = './data/all_years_342x256/test/'
 batch_size = 16 # increase it depending on how fast the gpu runs
-epochs = 1
+epochs = 30
 
 if K.image_data_format() == 'channels_first':
 	input_shape = (3, img_width, img_height)
@@ -33,7 +34,7 @@ else:
 # Loads the data from the directory, will try to make a separate class for it
 # Returns (X_train, y_train), (X_test, y_test)s
 
-def _load_data_train(data_dir=train_data_dir):
+def _load_data(data_dir):
 	
 	labels = os.listdir(data_dir)
 	label_counter = 0
@@ -61,69 +62,11 @@ def _load_data_train(data_dir=train_data_dir):
 
 	return (X_data, y_data)
 
-def _load_data_test(data_dir=test_data_dir):
-	
-	labels = os.listdir(data_dir)
-	label_counter = 0
-	label_lst = list()
-	img_lst = list()
 
-	# time to return the images and the labels
-
-	encoder = LabelEncoder()
-	for label in labels: 	
-		if (not label.startswith('.')):
-			img_dir = data_dir + str(label)+"/"
-			images = os.listdir(img_dir)
-			for img in images:
-				if (not img.startswith('.')):
-					img2 = imread((img_dir + img)[:])
-					img_lst.append(img2)
-					label_lst.append(label)
-
-	transformed_label = encoder.fit_transform(label_lst)
-
-	X_data = np.asarray(img_lst)
-	X_data = np.transpose(X_data, (0, 3, 1, 2))
-	y_data = np.asarray(transformed_label, dtype=np.uint8)
-	#X_data = X_data.transpose(0,3,1,2)
-
-	return (X_data, y_data)	
-
-def _load_data_val(data_dir=val_data_dir):
-	
-	labels = os.listdir(data_dir)
-	label_counter = 0
-	label_lst = list()
-	img_lst = list()
-
-	# time to return the images and the labels
-
-	encoder = LabelEncoder()
-	for label in labels: 	
-		if (not label.startswith('.')):
-			img_dir = data_dir + str(label)+"/"
-			images = os.listdir(img_dir)
-			for img in images:
-				if (not img.startswith('.')):
-					img2 = imread((img_dir + img)[:])
-					img_lst.append(img2)
-					label_lst.append(label)
-
-	transformed_label = encoder.fit_transform(label_lst)
-
-	X_data = np.asarray(img_lst)
-	X_data = np.transpose(X_data, (0, 3, 1, 2))
-	y_data = np.asarray(transformed_label, dtype=np.uint8)
-	#X_data = X_data.transpose(0,3,1,2)
-
-	return (X_data, y_data)		
-
-
-
-(X_train, y_train) = _load_data_train()
-(X_test, y_test) = _load_data_test()
-(X_val, y_val) = _load_data_val()
+# load the data
+(X_train, y_train) = _load_data(train_data_dir)
+(X_test, y_test) = _load_data(test_data_dir)
+(X_val, y_val) = _load_data(val_data_dir)
 
 # Preprocess the data
 
